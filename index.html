@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Busca de Arquivo em Java</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0f172a;
+        --fg: #e2e8f0;
+        --accent: #38bdf8;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px;
+      }
+
+      main {
+        max-width: 720px;
+        width: 100%;
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 18px;
+        padding: 32px;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 24px 80px rgba(8, 47, 73, 0.4);
+      }
+
+      h1 {
+        font-size: clamp(1.8rem, 1.5vw + 1.8rem, 2.8rem);
+        margin: 0 0 12px;
+        color: var(--fg);
+        letter-spacing: -0.02em;
+      }
+
+      p {
+        line-height: 1.6;
+        margin: 0 0 18px;
+      }
+
+      pre {
+        margin: 24px 0;
+        padding: 22px;
+        background: rgba(15, 23, 42, 0.8);
+        border-radius: 14px;
+        overflow-x: auto;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      code {
+        font-family: "JetBrains Mono", "Fira Code", Menlo, Monaco, Consolas, monospace;
+        font-size: 0.95rem;
+        color: var(--accent);
+        white-space: pre;
+      }
+
+      footer {
+        margin-top: 28px;
+        font-size: 0.9rem;
+        opacity: 0.75;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Método Java para buscar arquivo no PC</h1>
+      <p>
+        O método abaixo faz uma busca recursiva a partir de um diretório raiz e retorna o primeiro arquivo que
+        corresponde ao nome informado.
+      </p>
+      <pre><code>import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
+public final class FileSearcher {
+    private FileSearcher() {
+        throw new AssertionError("No instances");
+    }
+
+    public static Optional&lt;Path&gt; findFile(Path rootDir, String targetFileName) throws IOException {
+        Objects.requireNonNull(rootDir, "rootDir is required");
+        Objects.requireNonNull(targetFileName, "targetFileName is required");
+
+        if (!Files.isDirectory(rootDir)) {
+            throw new IllegalArgumentException("rootDir must be an existing directory");
+        }
+
+        AtomicReference&lt;Path&gt; result = new AtomicReference&lt;&gt;();
+
+        Files.walkFileTree(rootDir, new SimpleFileVisitor&lt;&gt;() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                if (attrs.isRegularFile() && file.getFileName().toString().equals(targetFileName)) {
+                    result.compareAndSet(null, file);
+                    return FileVisitResult.TERMINATE;
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                if (result.get() != null) {
+                    return FileVisitResult.TERMINATE;
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+
+        return Optional.ofNullable(result.get());
+    }
+}</code></pre>
+      <footer>
+        Copie o método para o seu projeto e passe um diretório inicial e o nome do arquivo que deseja encontrar.
+      </footer>
+    </main>
+  </body>
+</html>
